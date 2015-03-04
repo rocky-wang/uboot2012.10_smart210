@@ -31,7 +31,7 @@
 #define CONFIG_SAMSUNG		1	/* in a SAMSUNG core */
 #define CONFIG_S5P		1	/* which is in a S5P Family */
 #define CONFIG_S5PC110		1	/* which is in a S5PC110 */
-#define CONFIG_MACH_GONI	1	/* working with Goni */
+#define CONFIG_MACH_SMART210	1	/* working with SMART210 */
 
 #include <asm/arch/cpu.h>		/* get chip and board defs */
 
@@ -39,11 +39,16 @@
 #define CONFIG_DISPLAY_CPUINFO
 #define CONFIG_DISPLAY_BOARDINFO
 
+/*Add test function for rocky */
+#define CONFIG_LED1_ASM_TEST
+
+/*************************/
+
 /* input clock of PLL: has 24MHz input clock at S5PC110 */
 #define CONFIG_SYS_CLK_FREQ_C110	24000000
 
 /* DRAM Base */
-#define CONFIG_SYS_SDRAM_BASE		0x30000000
+#define CONFIG_SYS_SDRAM_BASE		0x20000000
 
 #define CONFIG_SETUP_MEMORY_TAGS
 #define CONFIG_CMDLINE_TAG

@@ -152,6 +152,9 @@ reset:
 	/* the mask ROM code should have PLL and others stable */
 #ifndef CONFIG_SKIP_LOWLEVEL_INIT
 	bl	cpu_init_cp15
+#ifdef CONFIG_LED1_ASM_TEST
+    bl  led1_asm
+#endif
 	bl	cpu_init_crit
 #endif
 
@@ -292,6 +295,22 @@ jump_2_ram:
 _board_init_r_ofs:
 	.word board_init_r - _start
 ENDPROC(relocate_code)
+#endif
+
+#ifdef CONFIG_LED1_ASM_TEST
+ENTRY(led1_asm)
+led1_asm:
+    /* LED status Testing for Rocky   */
+    ldr     r11,=0xE0200280      @GPJ2CON
+    ldr     r12,=0x1111          
+    str     r12,[r11]             @GPJ[0:3] Output
+
+    ldr     r11,=0xE0200284      @GPJ2DAT
+    ldr     r12,=0xe
+    str     r12,[r11]
+    bx      lr
+    
+    /*====================*/
 #endif
 
 /*************************************************************************

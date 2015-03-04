@@ -140,8 +140,11 @@ unexport CDPATH
 # The "examples" conditionally depend on U-Boot (say, when USE_PRIVATE_LIBGCC
 # is "yes"), so compile examples after U-Boot is compiled.
 SUBDIR_TOOLS = tools
-SUBDIR_EXAMPLES = examples/standalone examples/api
+#SUBDIR_EXAMPLES = examples/standalone examples/api
 SUBDIRS = $(SUBDIR_TOOLS)
+
+#add by rocky
+MKHEAD	= $(OBJTREE)/tools/mk210_header
 
 .PHONY : $(SUBDIRS) $(VERSION_FILE) $(TIMESTAMP_FILE)
 
@@ -379,6 +382,7 @@ endif
 # Always append ALL so that arch config.mk's can add custom ones
 ALL-y += $(obj)u-boot.srec $(obj)u-boot.bin $(obj)System.map
 
+ALL-$(CONFIG_MACH_SMART210) += smart210_uboot.bin
 ALL-$(CONFIG_NAND_U_BOOT) += $(obj)u-boot-nand.bin
 ALL-$(CONFIG_ONENAND_U_BOOT) += $(obj)u-boot-onenand.bin
 ALL-$(CONFIG_SPL) += $(obj)spl/u-boot-spl.bin
@@ -398,6 +402,9 @@ all:		$(ALL-y) $(SUBDIR_EXAMPLES)
 $(obj)u-boot.dtb:	$(obj)u-boot
 		$(MAKE) -C dts binary
 		mv $(obj)dts/dt.dtb $@
+
+$(obj)smart210_uboot.bin: $(obj)u-boot.bin
+		$(MKHEAD) $< $@
 
 $(obj)u-boot-dtb.bin:	$(obj)u-boot.bin $(obj)u-boot.dtb
 		cat $^ >$@
@@ -776,6 +783,7 @@ clean:
 	       $(obj)tools/envcrc					  \
 	       $(obj)tools/gdb/{astest,gdbcont,gdbsend}			  \
 	       $(obj)tools/gen_eth_addr    $(obj)tools/img2srec		  \
+		   $(obj)tools/mk210_header					\
 	       $(obj)tools/mk{env,}image   $(obj)tools/mpc86x_clk	  \
 	       $(obj)tools/mk{smdk5250,}spl				  \
 	       $(obj)tools/mxsboot					  \
@@ -816,6 +824,7 @@ clobber:	tidy
 	@rm -f $(obj)u-boot.dtb
 	@rm -f $(obj)u-boot.sb
 	@rm -f $(obj)u-boot.spr
+	@rm -f $(obj)smart210_uboot.bin
 	@rm -f $(obj)nand_spl/{u-boot.lds,u-boot-nand_spl.lds,u-boot-spl,u-boot-spl.map,System.map}
 	@rm -f $(obj)spl/{u-boot-spl,u-boot-spl.bin,u-boot-spl.lds,u-boot-spl.map}
 	@rm -f $(obj)MLO

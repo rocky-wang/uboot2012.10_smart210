@@ -5,6 +5,7 @@
 /kwboot
 /mkenvimage
 /mkimage
+/mk210_header
 /mpc86x_clk
 /mxsboot
 /ncb
