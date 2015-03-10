@@ -40,8 +40,8 @@
 #define CONFIG_DISPLAY_BOARDINFO
 
 /*Add test function for rocky */
-#define CONFIG_LED1_ASM_TEST
-
+#define CONFIG_LED_ASM_TEST
+#define CONFIG_LOWLEVEL_SERIAL_DEBUG
 /*************************/
 
 /* input clock of PLL: has 24MHz input clock at S5PC110 */

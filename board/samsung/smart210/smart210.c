@@ -65,10 +65,34 @@ void dram_init_banksize(void)
 	gd->bd->bi_dram[2].size = PHYS_SDRAM_3_SIZE;
 }
 
+#ifdef CONFIG_LOWLEVEL_SERIAL_DEBUG
+void display_hex_word(volatile unsigned int *addr)
+{
+    volatile unsigned char *utxh = 0xE2900020;
+    int value = *addr;
+    int tmp;
+    int i;
+
+    *utxh = '0';
+    *utxh = 'x';
+    for(i = 7; i >=0; i--){
+        tmp = (value>>(i*4)) & 0xf;
+        if(tmp > 10){
+            *utxh = tmp + 0x37;
+        }
+        else{
+            *utxh = tmp + '0';
+        }
+    }
+    *utxh = '\r';
+    *utxh = '\n';
+}
+#endif
+
 #ifdef CONFIG_DISPLAY_BOARDINFO
 int checkboard(void)
 {
-	puts("Board:\tGoni\n");
+	puts("Board:\tSmart210\n");
 	return 0;
 }
 #endif

@@ -405,6 +405,7 @@ $(obj)u-boot.dtb:	$(obj)u-boot
 
 $(obj)smart210_uboot.bin: $(obj)u-boot.bin
 		$(MKHEAD) $< $@
+		cp $@ /mnt/hgfs/vmshare/v2.bin
 
 $(obj)u-boot-dtb.bin:	$(obj)u-boot.bin $(obj)u-boot.dtb
 		cat $^ >$@

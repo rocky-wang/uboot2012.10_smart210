@@ -45,45 +45,15 @@ _TEXT_BASE:
 lowlevel_init:
 	mov	r11, lr
 
-	/* r5 has always zero */
+	/* r5 has always zero ; r8 has always GPIO_BASE */
 	mov	r5, #0
-
-	ldr	r7, =S5PC100_GPIO_BASE
-	ldr	r8, =S5PC100_GPIO_BASE
-	/* Read CPU ID */
-	ldr	r2, =S5PC110_PRO_ID
-	ldr	r0, [r2]
-	mov	r1, #0x00010000
-	and	r0, r0, r1
-	cmp	r0, r5
-	beq	100f
 	ldr	r8, =S5PC110_GPIO_BASE
-100:
-	/* Turn on KEY_LED_ON [GPJ4(1)] XMSMWEN */
-	cmp	r7, r8
-	beq	skip_check_didle			@ Support C110 only
 
 	ldr	r0, =S5PC110_RST_STAT
 	ldr	r1, [r0]
 	and	r1, r1, #0x000D0000
 	cmp	r1, #(0x1 << 19)			@ DEEPIDLE_WAKEUP
 	beq	didle_wakeup
-	cmp	r7, r8
-
-skip_check_didle:
-	addeq	r0, r8, #0x280				@ S5PC100_GPIO_J4
-	addne	r0, r8, #0x2C0				@ S5PC110_GPIO_J4
-	ldr	r1, [r0, #0x0]				@ GPIO_CON_OFFSET
-	bic	r1, r1, #(0xf << 4)			@ 1 * 4-bit
-	orr	r1, r1, #(0x1 << 4)
-	str	r1, [r0, #0x0]				@ GPIO_CON_OFFSET
-
-	ldr	r1, [r0, #0x4]				@ GPIO_DAT_OFFSET
-	bic	r1, r1, #(1 << 1)
-	str	r1, [r0, #0x4]				@ GPIO_DAT_OFFSET
-
-	/* Don't setup at s5pc100 */
-	beq	100f
 
 	/*
 	 * Initialize Async Register Setting for EVT1
@@ -167,68 +137,64 @@ skip_check_didle:
 	ldr	r1, =0x00800000
 	str	r1, [r0]
 
-100:
-	/* IO retension release */
-	ldreq	r0, =S5PC100_OTHERS			@ 0xE0108200
-	ldrne	r0, =S5PC110_OTHERS			@ 0xE010E000
-	ldr	r1, [r0]
-	ldreq	r2, =(1 << 31)				@ IO_RET_REL
-	ldrne	r2, =((1 << 31) | (1 << 30) | (1 << 29) | (1 << 28))
-	orr	r1, r1, r2
-	/* Do not release retention here for S5PC110 */
-	streq	r1, [r0]
-
 	/* Disable Watchdog */
-	ldreq	r0, =S5PC100_WATCHDOG_BASE		@ 0xEA200000
-	ldrne	r0, =S5PC110_WATCHDOG_BASE		@ 0xE2700000
+	ldr	r0, =S5PC110_WATCHDOG_BASE		@ 0xE2700000
 	str	r5, [r0]
 
 	/* setting SRAM */
-	ldreq	r0, =S5PC100_SROMC_BASE
-	ldrne	r0, =S5PC110_SROMC_BASE
-	ldr	r1, =0x9
+	ldr	r0, =S5PC110_SROMC_BASE
+	/* modify by rocky */
+    ldr r1,=0x0         @ r1,=0x9
 	str	r1, [r0]
 
-	/* S5PC100 has 3 groups of interrupt sources */
-	ldreq	r0, =S5PC100_VIC0_BASE			@ 0xE4000000
-	ldrne	r0, =S5PC110_VIC0_BASE			@ 0xF2000000
+	/* S5PV210 has 4 groups of interrupt sources */
+	ldr	r0, =S5PC110_VIC0_BASE			@ 0xF2000000
 	add	r1, r0, #0x00100000
 	add	r2, r0, #0x00200000
+	add r3, r0, #0x00300000
 
 	/* Disable all interrupts (VIC0, VIC1 and VIC2) */
-	mvn	r3, #0x0
-	str	r3, [r0, #0x14]				@ INTENCLEAR
-	str	r3, [r1, #0x14]				@ INTENCLEAR
-	str	r3, [r2, #0x14]				@ INTENCLEAR
+	mvn	r4, #0x0
+	str	r4, [r0, #0x14]				@ INTENCLEAR
+	str	r4, [r1, #0x14]				@ INTENCLEAR
+	str	r4, [r2, #0x14]				@ INTENCLEAR
+	str	r4, [r3, #0x14]				@ INTENCLEAR
 
 	/* Set all interrupts as IRQ */
 	str	r5, [r0, #0xc]				@ INTSELECT
 	str	r5, [r1, #0xc]				@ INTSELECT
 	str	r5, [r2, #0xc]				@ INTSELECT
+	str	r5, [r3, #0xc]				@ INTSELECT
 
 	/* Pending Interrupt Clear */
 	str	r5, [r0, #0xf00]			@ INTADDRESS
 	str	r5, [r1, #0xf00]			@ INTADDRESS
 	str	r5, [r2, #0xf00]			@ INTADDRESS
+	str	r5, [r3, #0xf00]			@ INTADDRESS
 
 	/* for UART */
 	bl	uart_asm_init
 
-	bl	internal_ram_init
+#ifdef CONFIG_LOWLEVEL_SERIAL_DEBUG
+    ldr r0, =0xE0000000
+    bl  display_hex_word
+#endif
 
-	cmp	r7, r8
+	bl	internal_ram_init
+    /* LED2 Testing add for rocky */
+#ifdef CONFIG_LED_ASM_TEST
+    bl  led2_asm
+#endif
+
 	/* Clear wakeup status register */
-	ldreq	r0, =S5PC100_WAKEUP_STAT
-	ldrne	r0, =S5PC110_WAKEUP_STAT
+	ldr	r0, =S5PC110_WAKEUP_STAT
 	ldr	r1, [r0]
 	str	r1, [r0]
 
 	/* IO retension release */
-	ldreq	r0, =S5PC100_OTHERS			@ 0xE0108200
-	ldrne	r0, =S5PC110_OTHERS			@ 0xE010E000
+	ldr	r0, =S5PC110_OTHERS			@ 0xE010E000
 	ldr	r1, [r0]
-	ldreq	r2, =(1 << 31)				@ IO_RET_REL
-	ldrne	r2, =((1 << 31) | (1 << 30) | (1 << 29) | (1 << 28))
+	ldr	r2, =((1 << 31) | (1 << 30) | (1 << 29) | (1 << 28))    @ IO_RET_REL
 	orr	r1, r1, r2
 	str	r1, [r0]
 
@@ -256,57 +222,12 @@ lockloop:
 	mov	lr, r11
 	mov	pc, lr
 
+#if 0
 /*
  * system_clock_init: Initialize core clock and bus clock.
  * void system_clock_init(void)
  */
 system_clock_init:
-	ldr	r0, =S5PC110_CLOCK_BASE		@ 0xE0100000
-
-	/* Check S5PC100 */
-	cmp	r7, r8
-	bne	110f
-100:
-	/* Set Lock Time */
-	ldr	r1, =0xe10			@ Locktime : 0xe10 = 3600
-	str	r1, [r0, #0x000]		@ S5PC100_APLL_LOCK
-	str	r1, [r0, #0x004]		@ S5PC100_MPLL_LOCK
-	str	r1, [r0, #0x008]		@ S5PC100_EPLL_LOCK
-	str	r1, [r0, #0x00C]		@ S5PC100_HPLL_LOCK
-
-	/* S5P_APLL_CON */
-	ldr	r1, =0x81bc0400		@ SDIV 0, PDIV 4, MDIV 444 (1333MHz)
-	str	r1, [r0, #0x100]
-	/* S5P_MPLL_CON */
-	ldr	r1, =0x80590201		@ SDIV 1, PDIV 2, MDIV 89 (267MHz)
-	str	r1, [r0, #0x104]
-	/* S5P_EPLL_CON */
-	ldr	r1, =0x80870303		@ SDIV 3, PDIV 3, MDIV 135 (67.5MHz)
-	str	r1, [r0, #0x108]
-	/* S5P_HPLL_CON */
-	ldr	r1, =0x80600603		@ SDIV 3, PDIV 6, MDIV 96
-	str	r1, [r0, #0x10C]
-
-	ldr     r1, [r0, #0x300]
-	ldr     r2, =0x00003fff
-	bic     r1, r1, r2
-	ldr     r2, =0x00011301
-
-	orr	r1, r1, r2
-	str	r1, [r0, #0x300]
-	ldr     r1, [r0, #0x304]
-	ldr     r2, =0x00011110
-	orr     r1, r1, r2
-	str     r1, [r0, #0x304]
-	ldr     r1, =0x00000001
-	str     r1, [r0, #0x308]
-
-	/* Set Source Clock */
-	ldr	r1, =0x00001111			@ A, M, E, HPLL Muxing
-	str	r1, [r0, #0x200]		@ S5PC1XX_CLK_SRC0
-
-	b	200f
-110:
 	ldr	r0, =0xE010C000			@ S5PC110_PWR_CFG
 
 	/* Set OSC_FREQ value */
@@ -400,15 +321,16 @@ system_clock_init:
 	bne	1b
 
 	mov	pc, lr
+#endif
 
 internal_ram_init:
-	ldreq	r0, =0xE3800000
-	ldrne	r0, =0xF1500000
+	ldr	r0, =0xF1500000
 	ldr	r1, =0x0
 	str	r1, [r0]
 
 	mov	pc, lr
 
+.global display_hex_word
 /*
  * uart_asm_init: Initialize UART's pins
  */
@@ -416,50 +338,47 @@ uart_asm_init:
 	/* set GPIO to enable UART0-UART4 */
 	mov	r0, r8
 	ldr	r1, =0x22222222
-	str	r1, [r0, #0x0]			@ S5PC100_GPIO_A0_OFFSET
+	str	r1, [r0, #0x0]			@ S5PV210_GPIO_A0_OFFSET
 	ldr	r1, =0x00002222
-	str	r1, [r0, #0x20]			@ S5PC100_GPIO_A1_OFFSET
+	str	r1, [r0, #0x20]			@ S5PV210_GPIO_A1_OFFSET
 
-	/* Check S5PC100 */
-	cmp	r7, r8
-	bne	110f
+#ifdef CONFIG_LOWLEVEL_SERIAL_DEBUG
+    ldr r0, =0xE2900000         @ ULCON0
+    ldr r1, =0x3
+    str r1,[r0]
 
-	/* UART_SEL GPK0[5] at S5PC100 */
-	add	r0, r8, #0x2A0			@ S5PC100_GPIO_K0_OFFSET
-	ldr	r1, [r0, #0x0]			@ S5PC1XX_GPIO_CON_OFFSET
-	bic	r1, r1, #(0xf << 20)		@ 20 = 5 * 4-bit
-	orr	r1, r1, #(0x1 << 20)		@ Output
-	str	r1, [r0, #0x0]			@ S5PC1XX_GPIO_CON_OFFSET
+    ldr r1, =0x305
+    str r1,[r0,#0x4]              @ UCON0
 
-	ldr	r1, [r0, #0x8]			@ S5PC1XX_GPIO_PULL_OFFSET
-	bic	r1, r1, #(0x3 << 10)		@ 10 = 5 * 2-bit
-	orr	r1, r1, #(0x2 << 10)		@ Pull-up enabled
-	str	r1, [r0, #0x8]			@ S5PC1XX_GPIO_PULL_OFFSET
+    ldr r1, =1
+    str r1,[r0,#0x8]
+    
+    str r5,[r0,#0xc]
 
-	ldr	r1, [r0, #0x4]			@ S5PC1XX_GPIO_DAT_OFFSET
-	orr	r1, r1, #(1 << 5)		@ 5 = 5 * 1-bit
-	str	r1, [r0, #0x4]			@ S5PC1XX_GPIO_DAT_OFFSET
+    ldr r1, =34
+    str r1,[r0,#0x28]           @ UBRDIV
 
-	b	200f
-110:
-	/*
-	 * Note that the following address
-	 * 0xE020'0360 is reserved address at S5PC100
-	 */
-	/* UART_SEL MP0_5[7] at S5PC110 */
-	add	r0, r8, #0x360			@ S5PC110_GPIO_MP0_5_OFFSET
-	ldr	r1, [r0, #0x0]			@ S5PC1XX_GPIO_CON_OFFSET
-	bic	r1, r1, #(0xf << 28)		@ 28 = 7 * 4-bit
-	orr	r1, r1, #(0x1 << 28)		@ Output
-	str	r1, [r0, #0x0]			@ S5PC1XX_GPIO_CON_OFFSET
+    ldr r1, =0xdfdd
+    str r1,[r0,#0x2c]           @ UDIVSLOT
 
-	ldr	r1, [r0, #0x8]			@ S5PC1XX_GPIO_PULL_OFFSET
-	bic	r1, r1, #(0x3 << 14)		@ 14 = 7 * 2-bit
-	orr	r1, r1, #(0x2 << 14)		@ Pull-up enabled
-	str	r1, [r0, #0x8]			@ S5PC1XX_GPIO_PULL_OFFSET
+    ldr r0, =0xE2900020         @ UTH0
+    ldr r1, =0x55
+    str r1,[r0]           @ 'U'
+    
+    ldr r1, =0x61
+    str r1,[r0]           @ 'a'
+    
+    ldr r1, =0x72
+    str r1,[r0]           @ 'r'
+    
+    ldr r1, =0x74
+    str r1,[r0]           @ 't'
+    
+    ldr r1, =0xa
+    str r1,[r0]
+    ldr r1, =0xd
+    str r1,[r0]         
+#endif
 
-	ldr	r1, [r0, #0x4]			@ S5PC1XX_GPIO_DAT_OFFSET
-	orr	r1, r1, #(1 << 7)		@ 7 = 7 * 1-bit
-	str	r1, [r0, #0x4]			@ S5PC1XX_GPIO_DAT_OFFSET
-200:
 	mov	pc, lr
+	
