@@ -42,6 +42,7 @@ _TEXT_BASE:
 	.word	CONFIG_SYS_TEXT_BASE
 
 	.globl lowlevel_init
+	.globl mem_ctrl_asm_init
 lowlevel_init:
 	mov	r11, lr
 
@@ -181,6 +182,18 @@ lowlevel_init:
 #endif
 
 	bl	internal_ram_init
+
+    /* DDR2 Memory Setup */
+	bl  mem_ctrl_asm_init
+
+#ifdef CONFIG_LOWLEVEL_SERIAL_DEBUG
+	ldr r1,=0x11223344
+	ldr r0,=0x30000000
+	str r1,[r0]
+
+	bl  display_hex_word
+#endif
+
     /* LED2 Testing add for rocky */
 #ifdef CONFIG_LED_ASM_TEST
     bl  led2_asm
