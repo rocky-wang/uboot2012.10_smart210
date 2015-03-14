@@ -158,15 +158,30 @@ reset:
 	bl	cpu_init_crit
 #endif
 
+    ldr r0,=_start          @ CONFIG_SYS_TEXT_BASE
+    ldr r1,=49              @ SD_Card sector num
+    bl  copy_code_to_dram
+
+#ifdef CONFIG_LED_ASM_TEST
+    bl  led3_asm
+#endif
+
+    ldr r0,=_start
+    bl  display_hex_word
+    
 /* Set stackpointer in internal RAM to call board_init_f */
 call_board_init_f:
 	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)
 	bic	sp, sp, #7 /* 8-byte alignment for ABI compliance */
+/* Jump to link adderss in board_init_f */
 	ldr	r0,=0x00000000
-	bl	board_init_f
+	ldr pc,BOARD_INIT_F_BASE
+	//bl	board_init_f
+
+BOARD_INIT_F_BASE:
+    .word   board_init_f
 
 /*------------------------------------------------------------------------------*/
-
 #ifndef CONFIG_SPL_BUILD
 /*
  * void relocate_code (addr_sp, gd, addr_moni)
@@ -300,18 +315,23 @@ ENDPROC(relocate_code)
 #ifdef CONFIG_LED_ASM_TEST
 led_asm_init:
     /* LED status Testing for Rocky   */
-    ldr     r11,=0xE0200280      @GPJ2CON
-    ldr     r12,=0x1111          
-    str     r12,[r11]             @GPJ[0:3] Output
+    ldr     r9,=0xE0200280       @GPJ2CON
+    ldr     r10,=0x1111          
+    str     r10,[r9]             @GPJ[0:3] Output
 ENTRY(led1_asm)
-    ldr     r11,=0xE0200284      @GPJ2DAT
-    ldr     r12,=0xe
-    str     r12,[r11]
+    ldr     r9,=0xE0200284      @GPJ2DAT
+    ldr     r10,=0xe
+    str     r10,[r9]
     mov     pc,lr
 ENTRY(led2_asm)
-    ldr     r11,=0xE0200284      @GPJ2DAT
-    ldr     r12,=0xd
-    str     r12,[r11]
+    ldr     r9,=0xE0200284      @GPJ2DAT
+    ldr     r10,=0xd
+    str     r10,[r9]
+    mov     pc,lr
+ENTRY(led3_asm)
+    ldr     r9,=0xE0200284      @GPJ2DAT
+    ldr     r10,=0xb
+    str     r10,[r9]
     mov     pc,lr
     /*====================*/
 #endif

@@ -382,7 +382,7 @@ endif
 # Always append ALL so that arch config.mk's can add custom ones
 ALL-y += $(obj)u-boot.srec $(obj)u-boot.bin $(obj)System.map
 
-ALL-$(CONFIG_MACH_SMART210) += smart210_uboot.bin
+#ALL-$(CONFIG_MACH_SMART210) += smart210_uboot.bin
 ALL-$(CONFIG_NAND_U_BOOT) += $(obj)u-boot-nand.bin
 ALL-$(CONFIG_ONENAND_U_BOOT) += $(obj)u-boot-onenand.bin
 ALL-$(CONFIG_SPL) += $(obj)spl/u-boot-spl.bin
@@ -683,9 +683,9 @@ $(VERSION_FILE):
 		@mkdir -p $(dir $(VERSION_FILE))
 		@( localvers='$(shell $(TOPDIR)/tools/setlocalversion $(TOPDIR))' ; \
 		   printf '#define PLAIN_VERSION "%s%s"\n' \
-			"$(U_BOOT_VERSION)" "$${localvers}" ; \
+			"$(U_BOOT_VERSION)" ; \
 		   printf '#define U_BOOT_VERSION "U-Boot %s%s"\n' \
-			"$(U_BOOT_VERSION)" "$${localvers}" ; \
+			"$(U_BOOT_VERSION)" ; \
 		) > $@.tmp
 		@( printf '#define CC_VERSION_STRING "%s"\n' \
 		 '$(shell $(CC) --version | head -n 1)' )>>  $@.tmp
@@ -825,7 +825,7 @@ clobber:	tidy
 	@rm -f $(obj)u-boot.dtb
 	@rm -f $(obj)u-boot.sb
 	@rm -f $(obj)u-boot.spr
-	@rm -f $(obj)smart210_uboot.bin
+	@rm -f $(obj)u-boot.16k
 	@rm -f $(obj)nand_spl/{u-boot.lds,u-boot-nand_spl.lds,u-boot-spl,u-boot-spl.map,System.map}
 	@rm -f $(obj)spl/{u-boot-spl,u-boot-spl.bin,u-boot-spl.lds,u-boot-spl.map}
 	@rm -f $(obj)MLO

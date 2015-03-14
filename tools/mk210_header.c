@@ -46,15 +46,17 @@ int main(int argc,char **argv)
         return errno;
     }
     file_len = ftell(fp);
-	printf("the file size is %d\n",file_len);
-    file_len = (file_len > MEM16KB) ? MEM16KB - HEADSIZE : file_len;
+
+	/* In fact, file_len need be compare MEM16KB-HEADSIZE */
+	ret = (file_len > MEM16KB) ?  MEM16KB : (file_len+HEADSIZE);
+    file_len = (file_len > MEM16KB) ? (MEM16KB - HEADSIZE) : file_len;
 
     /* Allocate heap buf for checksum */
     buf16K = (unsigned char *)malloc(file_len+HEADSIZE);
     memset(buf16K,0,file_len+HEADSIZE);
 
     /* Fill 1WROD in buf16k offset 0x0,data is file_len */
-    memcpy(buf16K,&file_len,4);
+    memcpy(buf16K,&ret,4);
 
     /* Fill 1WORD in buf16k offset 0x8,data is checksum */
     /* Read file data to buf16k offset 0x10 */

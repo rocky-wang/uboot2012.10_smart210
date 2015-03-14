@@ -49,8 +49,7 @@ int board_init(void)
 
 int dram_init(void)
 {
-	gd->ram_size = PHYS_SDRAM_1_SIZE + PHYS_SDRAM_2_SIZE +
-			PHYS_SDRAM_3_SIZE;
+	gd->ram_size = PHYS_SDRAM_1_SIZE;
 
 	return 0;
 }
@@ -59,25 +58,23 @@ void dram_init_banksize(void)
 {
 	gd->bd->bi_dram[0].start = PHYS_SDRAM_1;
 	gd->bd->bi_dram[0].size = PHYS_SDRAM_1_SIZE;
-	gd->bd->bi_dram[1].start = PHYS_SDRAM_2;
-	gd->bd->bi_dram[1].size = PHYS_SDRAM_2_SIZE;
-	gd->bd->bi_dram[2].start = PHYS_SDRAM_3;
-	gd->bd->bi_dram[2].size = PHYS_SDRAM_3_SIZE;
 }
 
 #ifdef CONFIG_LOWLEVEL_SERIAL_DEBUG
 void display_hex_word(volatile unsigned int *addr)
 {
     volatile unsigned char *utxh = 0xE2900020;
-    int value = *addr;
+    volatile unsigned char *ustat = 0xE2900010;
+    unsigned int value = *addr;
     int tmp;
     int i;
 
     *utxh = '0';
     *utxh = 'x';
-    for(i = 7; i >=0; i--){
-        tmp = (value>>(i*4)) & 0xf;
-        if(tmp > 10){
+    for(i = 7; i >= 0; i--){
+        tmp = ((value>>(i*4)) & 0xf);
+        while(!(*ustat & (0x1<<2)));
+        if(tmp >= 10){
             *utxh = tmp + 0x37;
         }
         else{
@@ -86,6 +83,21 @@ void display_hex_word(volatile unsigned int *addr)
     }
     *utxh = '\r';
     *utxh = '\n';
+}
+#endif
+
+#ifdef CONFIG_BOARD_INIT_F_DEBUG
+int board_init_puts(void)
+{
+    volatile unsigned char *utxh = 0xE2900020;
+
+    *utxh = 'B';
+    *utxh = 'L';
+    *utxh = '1';
+    *utxh = '\r';
+    *utxh = '\n';
+
+    return 0;
 }
 #endif
 

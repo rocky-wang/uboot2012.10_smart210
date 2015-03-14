@@ -302,6 +302,7 @@ void board_init_f(ulong bootflag)
 		}
 	}
 
+    printf("the start is %x\n",*(unsigned int *)0x34800000);
 #ifdef CONFIG_OF_CONTROL
 	/* For now, put this check after the console is ready */
 	if (fdtdec_prepare_fdt()) {

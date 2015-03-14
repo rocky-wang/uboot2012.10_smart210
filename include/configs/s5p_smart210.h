@@ -42,6 +42,8 @@
 /*Add test function for rocky */
 #define CONFIG_LED_ASM_TEST
 #define CONFIG_LOWLEVEL_SERIAL_DEBUG
+//#define CONFIG_BOARD_INIT_F_DEBUG
+#define CONFIG_IDENT_STRING "For Rocky"
 /*************************/
 
 /* input clock of PLL: has 24MHz input clock at S5PC110 */
@@ -63,7 +65,7 @@
 /*
  * select serial console configuration
  */
-#define CONFIG_SERIAL2			1	/* use SERIAL2 */
+#define CONFIG_SERIAL0			1	/* use SERIAL0 */
 #define CONFIG_SERIAL_MULTI		1
 #define CONFIG_BAUDRATE			115200
 
@@ -97,25 +99,10 @@
 #define CONFIG_ZERO_BOOTDELAY_CHECK
 
 #define CONFIG_MTD_DEVICE
-#define CONFIG_MTD_PARTITIONS
-
-/* Actual modem binary size is 16MiB. Add 2MiB for bad block handling */
-#define MTDIDS_DEFAULT		"onenand0=samsung-onenand"
-#define MTDPARTS_DEFAULT	"mtdparts=samsung-onenand:1m(bootloader)"\
-				",256k(params)"\
-				",2816k(config)"\
-				",8m(csa)"\
-				",7m(kernel)"\
-				",1m(log)"\
-				",12m(modem)"\
-				",60m(qboot)"\
-				",-(UBI)\0"
-
-#define NORMAL_MTDPARTS_DEFAULT MTDPARTS_DEFAULT
 
 #define CONFIG_BOOTCOMMAND	"run ubifsboot"
 
-#define CONFIG_DEFAULT_CONSOLE	"console=ttySAC2,115200n8\0"
+#define CONFIG_DEFAULT_CONSOLE	"console=ttySAC0,115200n8\0"
 
 #define CONFIG_RAMDISK_BOOT	"root=/dev/ram0 rw rootfstype=ext2" \
 		" ${console} ${meminfo}"
@@ -134,49 +121,6 @@
 
 #define CONFIG_ENV_OVERWRITE
 #define CONFIG_SYS_CONSOLE_IS_IN_ENV
-#define CONFIG_EXTRA_ENV_SETTINGS					\
-	CONFIG_UPDATEB \
-	"updatek=" \
-		"onenand erase 0xc00000 0x600000;" \
-		"onenand write 0x31008000 0xc00000 0x600000\0" \
-	"updateu=" \
-		"onenand erase 0x01560000 0x1eaa0000;" \
-		"onenand write 0x32000000 0x1260000 0x8C0000\0" \
-	"bootk=" \
-		"onenand read 0x30007FC0 0xc00000 0x600000;" \
-		"bootm 0x30007FC0\0" \
-	"flashboot=" \
-		"set bootargs root=/dev/mtdblock${bootblock} " \
-		"rootfstype=${rootfstype}" CONFIG_UBI_MTD " ${opts} " \
-		"${lcdinfo} " CONFIG_COMMON_BOOT "; run bootk\0" \
-	"ubifsboot=" \
-		"set bootargs root=ubi0!rootfs rootfstype=ubifs " \
-		CONFIG_UBIFS_OPTION CONFIG_UBI_MTD " ${opts} ${lcdinfo} " \
-		CONFIG_COMMON_BOOT "; run bootk\0" \
-	"tftpboot=" \
-		"set bootargs root=ubi0!rootfs rootfstype=ubifs " \
-		CONFIG_UBIFS_OPTION CONFIG_UBI_MTD " ${opts} ${lcdinfo} " \
-		CONFIG_COMMON_BOOT "; tftp 0x30007FC0 uImage; " \
-		"bootm 0x30007FC0\0" \
-	"ramboot=" \
-		"set bootargs " CONFIG_RAMDISK_BOOT \
-		" initrd=0x33000000,8M ramdisk=8192\0" \
-	"mmcboot=" \
-		"set bootargs root=${mmcblk} rootfstype=${rootfstype}" \
-		CONFIG_UBI_MTD " ${opts} ${lcdinfo} " \
-		CONFIG_COMMON_BOOT "; run bootk\0" \
-	"boottrace=setenv opts initcall_debug; run bootcmd\0" \
-	"bootchart=set opts init=/sbin/bootchartd; run bootcmd\0" \
-	"verify=n\0" \
-	"rootfstype=cramfs\0" \
-	"console=" CONFIG_DEFAULT_CONSOLE \
-	"mtdparts=" MTDPARTS_DEFAULT \
-	"meminfo=mem=80M mem=256M@0x40000000 mem=128M@0x50000000\0" \
-	"mmcblk=/dev/mmcblk1p1\0" \
-	"bootblock=9\0" \
-	"ubiblock=8\0" \
-	"ubi=enabled\0" \
-	"opts=always_resume=1"
 
 /* Miscellaneous configurable options */
 #define CONFIG_SYS_LONGHELP		/* undef to save memory */
@@ -194,20 +138,17 @@
 
 #define CONFIG_SYS_HZ			1000
 
-/* Goni has 3 banks of DRAM, but swap the bank */
-#define CONFIG_NR_DRAM_BANKS	3
-#define PHYS_SDRAM_1		CONFIG_SYS_SDRAM_BASE	/* OneDRAM Bank #0 */
-#define PHYS_SDRAM_1_SIZE	(80 << 20)		/* 80 MB in Bank #0 */
-#define PHYS_SDRAM_2		0x40000000		/* mDDR DMC1 Bank #1 */
-#define PHYS_SDRAM_2_SIZE	(256 << 20)		/* 256 MB in Bank #1 */
-#define PHYS_SDRAM_3		0x50000000		/* mDDR DMC2 Bank #2 */
-#define PHYS_SDRAM_3_SIZE	(128 << 20)		/* 128 MB in Bank #2 */
+/* Smart210 has 1 banks of DRAM */
+#define CONFIG_NR_DRAM_BANKS	1
+#define PHYS_SDRAM_1		CONFIG_SYS_SDRAM_BASE	/* mDDR DMC1 Bank #0 */
+#define PHYS_SDRAM_1_SIZE	(512 << 20)		/* 512 MB in Bank #0 */
 
 #define CONFIG_SYS_MONITOR_BASE		0x00000000
 #define CONFIG_SYS_MONITOR_LEN		(256 << 10)	/* 256 KiB */
 
 /* FLASH and environment organization */
-#define CONFIG_ENV_IS_IN_ONENAND	1
+//#define CONFIG_ENV_IS_IN_ONENAND	1
+#define CONFIG_ENV_IS_NOWHERE	1
 #define CONFIG_ENV_SIZE			(256 << 10)	/* 256 KiB, 0x40000 */
 #define CONFIG_ENV_ADDR			(1 << 20)	/* 1 MB, 0x100000 */
 

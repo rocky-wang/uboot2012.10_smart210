@@ -187,16 +187,11 @@ lowlevel_init:
 	bl  mem_ctrl_asm_init
 
 #ifdef CONFIG_LOWLEVEL_SERIAL_DEBUG
-	ldr r1,=0x11223344
+	ldr r1,=0xabcdef12
 	ldr r0,=0x30000000
 	str r1,[r0]
 
 	bl  display_hex_word
-#endif
-
-    /* LED2 Testing add for rocky */
-#ifdef CONFIG_LED_ASM_TEST
-    bl  led2_asm
 #endif
 
 	/* Clear wakeup status register */
@@ -210,6 +205,11 @@ lowlevel_init:
 	ldr	r2, =((1 << 31) | (1 << 30) | (1 << 29) | (1 << 28))    @ IO_RET_REL
 	orr	r1, r1, r2
 	str	r1, [r0]
+
+    /* LED2 Testing add for rocky */
+#ifdef CONFIG_LED_ASM_TEST
+    bl  led2_asm
+#endif
 
 	b	1f
 
@@ -343,7 +343,6 @@ internal_ram_init:
 
 	mov	pc, lr
 
-.global display_hex_word
 /*
  * uart_asm_init: Initialize UART's pins
  */
