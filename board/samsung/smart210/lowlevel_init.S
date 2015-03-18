@@ -176,7 +176,7 @@ lowlevel_init:
 	/* for UART */
 	bl	uart_asm_init
 
-#ifdef CONFIG_LOWLEVEL_SERIAL_DEBUG
+#ifdef CONFIG_LOWLEVEL_INFO_SHOW
     ldr r0, =0xE0000000
     bl  display_hex_word
 #endif
@@ -186,7 +186,7 @@ lowlevel_init:
     /* DDR2 Memory Setup */
 	bl  mem_ctrl_asm_init
 
-#ifdef CONFIG_LOWLEVEL_SERIAL_DEBUG
+#ifdef CONFIG_LOWLEVEL_INFO_SHOW
 	ldr r1,=0xabcdef12
 	ldr r0,=0x30000000
 	str r1,[r0]
@@ -235,7 +235,7 @@ lockloop:
 	mov	lr, r11
 	mov	pc, lr
 
-#if 0
+#ifdef CONFIG_SYSTEM_CLOCK_INIT
 /*
  * system_clock_init: Initialize core clock and bus clock.
  * void system_clock_init(void)
@@ -373,6 +373,7 @@ uart_asm_init:
     ldr r1, =0xdfdd
     str r1,[r0,#0x2c]           @ UDIVSLOT
 
+#ifdef CONFIG_LOWLEVEL_INFO_SHOW
     ldr r0, =0xE2900020         @ UTH0
     ldr r1, =0x55
     str r1,[r0]           @ 'U'
@@ -389,7 +390,9 @@ uart_asm_init:
     ldr r1, =0xa
     str r1,[r0]
     ldr r1, =0xd
-    str r1,[r0]         
+    str r1,[r0]  
+#endif
+
 #endif
 
 	mov	pc, lr

@@ -160,14 +160,18 @@ reset:
 
     ldr r0,=_start          @ CONFIG_SYS_TEXT_BASE
     ldr r1,=49              @ SD_Card sector num
+    adr r4,_end_ofs
+    ldr r2,[r4]
     bl  copy_code_to_dram
 
 #ifdef CONFIG_LED_ASM_TEST
     bl  led3_asm
 #endif
 
+#ifdef CONFIG_LOWLEVEL_INFO_SHOW
     ldr r0,=_start
     bl  display_hex_word
+#endif
     
 /* Set stackpointer in internal RAM to call board_init_f */
 call_board_init_f:

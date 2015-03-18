@@ -28,7 +28,8 @@ include $(TOPDIR)/config.mk
 
 LIB	= $(obj)lib$(BOARD).o
 
-COBJS-y	:= smart210.o onenand.o mmc_relocate.o
+#COBJS-y	:= smart210.o onenand.o mmc_relocate.o
+COBJS-y	:= smart210.o mmc_relocate.o
 SOBJS	:= lowlevel_init.o
 SOBJS	+= mem_setup.o
 

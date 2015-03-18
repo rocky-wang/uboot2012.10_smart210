@@ -40,14 +40,17 @@
 #define CONFIG_DISPLAY_BOARDINFO
 
 /*Add test function for rocky */
-#define CONFIG_LED_ASM_TEST
+//#define CONFIG_LED_ASM_TEST
 #define CONFIG_LOWLEVEL_SERIAL_DEBUG
-//#define CONFIG_BOARD_INIT_F_DEBUG
-#define CONFIG_IDENT_STRING "For Rocky"
+//#define CONFIG_LOWLEVEL_INFO_SHOW
+#define CONFIG_IDENT_STRING " For Rocky"
 /*************************/
 
 /* input clock of PLL: has 24MHz input clock at S5PC110 */
 #define CONFIG_SYS_CLK_FREQ_C110	24000000
+
+/* PWM init */
+#define CONFIG_PWM    1
 
 /* DRAM Base */
 #define CONFIG_SYS_SDRAM_BASE		0x20000000
@@ -69,15 +72,6 @@
 #define CONFIG_SERIAL_MULTI		1
 #define CONFIG_BAUDRATE			115200
 
-/* MMC */
-#define CONFIG_GENERIC_MMC
-#define CONFIG_MMC
-#define CONFIG_SDHCI
-#define CONFIG_S5P_SDHCI
-
-/* PWM */
-#define CONFIG_PWM			1
-
 /* It should define before config_cmd_default.h */
 #define CONFIG_SYS_NO_FLASH		1
 
@@ -90,41 +84,20 @@
 #undef CONFIG_CMD_NFS
 #undef CONFIG_CMD_XIMG
 #define CONFIG_CMD_CACHE
-#define CONFIG_CMD_REGINFO
-#define CONFIG_CMD_ONENAND
-#define CONFIG_CMD_MTDPARTS
-#define CONFIG_CMD_MMC
 
-#define CONFIG_BOOTDELAY		1
+#define CONFIG_BOOTDELAY		3
 #define CONFIG_ZERO_BOOTDELAY_CHECK
 
-#define CONFIG_MTD_DEVICE
+#define CONFIG_BOOTCOMMAND	"bootm 20008000"
 
-#define CONFIG_BOOTCOMMAND	"run ubifsboot"
-
-#define CONFIG_DEFAULT_CONSOLE	"console=ttySAC0,115200n8\0"
-
-#define CONFIG_RAMDISK_BOOT	"root=/dev/ram0 rw rootfstype=ext2" \
-		" ${console} ${meminfo}"
-
-#define CONFIG_COMMON_BOOT	"${console} ${meminfo} ${mtdparts}"
-
-#define CONFIG_BOOTARGS	"root=/dev/mtdblock8 ubi.mtd=8 ubi.mtd=3 ubi.mtd=6" \
-		" rootfstype=cramfs " CONFIG_COMMON_BOOT
-
-#define CONFIG_UPDATEB	"updateb=onenand erase 0x0 0x100000;" \
-			" onenand write 0x32008000 0x0 0x100000\0"
-
-#define CONFIG_UBI_MTD	" ubi.mtd=${ubiblock} ubi.mtd=3 ubi.mtd=6"
-
-#define CONFIG_UBIFS_OPTION	"rootflags=bulk_read,no_chk_data_crc"
+#define CONFIG_BOOTARGS	"root=/dev/mtdblock2 init=/linuxrc console=ttySAC0,115200"
 
 #define CONFIG_ENV_OVERWRITE
 #define CONFIG_SYS_CONSOLE_IS_IN_ENV
 
 /* Miscellaneous configurable options */
 #define CONFIG_SYS_LONGHELP		/* undef to save memory */
-#define CONFIG_SYS_HUSH_PARSER		/* use "hush" command parser	*/
+//#define CONFIG_SYS_HUSH_PARSER		/* use "hush" command parser	*/
 #define CONFIG_SYS_PROMPT	"Smart210 # "
 #define CONFIG_SYS_CBSIZE	256	/* Console I/O Buffer Size */
 #define CONFIG_SYS_PBSIZE	384	/* Print Buffer Size */
@@ -152,33 +125,12 @@
 #define CONFIG_ENV_SIZE			(256 << 10)	/* 256 KiB, 0x40000 */
 #define CONFIG_ENV_ADDR			(1 << 20)	/* 1 MB, 0x100000 */
 
-#define CONFIG_USE_ONENAND_BOARD_INIT
-#define CONFIG_SAMSUNG_ONENAND		1
-#define CONFIG_SYS_ONENAND_BASE		0xB0000000
-
 #define CONFIG_DOS_PARTITION		1
 
 #define CONFIG_SYS_INIT_SP_ADDR	(CONFIG_SYS_LOAD_ADDR - 0x1000000)
 
 #define CONFIG_SYS_CACHELINE_SIZE       64
 
-#define CONFIG_PMIC
-#define CONFIG_PMIC_I2C
-#define CONFIG_PMIC_MAX8998
-
 #include <asm/arch/gpio.h>
-/*
- * I2C Settings
- */
-#define CONFIG_SOFT_I2C_GPIO_SCL s5pc110_gpio_get_nr(j4, 3)
-#define CONFIG_SOFT_I2C_GPIO_SDA s5pc110_gpio_get_nr(j4, 0)
-
-#define CONFIG_SOFT_I2C	1
-#define CONFIG_SYS_I2C_SPEED	50000
-#define CONFIG_I2C_MULTI_BUS
-#define CONFIG_SYS_MAX_I2C_BUS	7
-#define CONFIG_USB_GADGET
-#define CONFIG_USB_GADGET_S3C_UDC_OTG
-#define CONFIG_USB_GADGET_DUALSPEED
 
 #endif	/* __CONFIG_H */

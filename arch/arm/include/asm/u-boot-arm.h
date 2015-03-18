@@ -57,9 +57,6 @@ int	arch_early_init_r(void);
 /* board/.../... */
 int	board_init(void);
 int	dram_init (void);
-#ifdef CONFIG_BOARD_INIT_F_DEBUG
-int board_init_puts(void);
-#endif
 void	dram_init_banksize (void);
 void	setup_serial_tag (struct tag **params);
 void	setup_revision_tag (struct tag **params);

@@ -86,21 +86,6 @@ void display_hex_word(volatile unsigned int *addr)
 }
 #endif
 
-#ifdef CONFIG_BOARD_INIT_F_DEBUG
-int board_init_puts(void)
-{
-    volatile unsigned char *utxh = 0xE2900020;
-
-    *utxh = 'B';
-    *utxh = 'L';
-    *utxh = '1';
-    *utxh = '\r';
-    *utxh = '\n';
-
-    return 0;
-}
-#endif
-
 #ifdef CONFIG_DISPLAY_BOARDINFO
 int checkboard(void)
 {

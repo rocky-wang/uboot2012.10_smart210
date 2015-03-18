@@ -36,7 +36,6 @@ int main(int argc,char **argv)
         fprintf(stderr,"fopen %s error:%s!\n",argv[1],strerror(errno));
         return errno;
     }
-    printf("the %s file open success!\n",argv[1]);
 
     /* Get file size */
     ret = fseek(fp,0,SEEK_END);
@@ -47,9 +46,10 @@ int main(int argc,char **argv)
     }
     file_len = ftell(fp);
 
-	/* In fact, file_len need be compare MEM16KB-HEADSIZE */
-	ret = (file_len > MEM16KB) ?  MEM16KB : (file_len+HEADSIZE);
-    file_len = (file_len > MEM16KB) ? (MEM16KB - HEADSIZE) : file_len;
+	/* In fact, file_len need be compare MEM16KB - HEADSIZE */
+	/* ret is store the BL1 load size value */
+	ret = (file_len >= (MEM16KB - HEADSIZE)) ?  MEM16KB : (file_len+HEADSIZE);
+    file_len = (file_len >= (MEM16KB - HEADSIZE)) ? (MEM16KB - HEADSIZE) : file_len;
 
     /* Allocate heap buf for checksum */
     buf16K = (unsigned char *)malloc(file_len+HEADSIZE);
@@ -73,7 +73,6 @@ int main(int argc,char **argv)
     for(count = 0; count < rw_len; count++){
         check_sum += tmp_count[count];
     }
-    printf("the checksum is %x\n",check_sum);
     memcpy(buf16K+0x8,&check_sum,4);
     fclose(fp);
     

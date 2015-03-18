@@ -123,7 +123,7 @@ find_lock_val:
 	ldr	r1, =0x00202400					
 	str	r1, [r0, #0x04]                 @ DMC_MEMCONTROL_OFFSET
 
-#ifdef CONFIG_LOWLEVEL_SERIAL_DEBUG
+#ifdef CONFIG_LOWLEVEL_INFO_SHOW
 	ldr	r0,=0xE2900020
 	ldr	r1,=0x44			@UTH0='D'
 	str	r1,[r0]
