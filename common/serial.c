@@ -87,9 +87,9 @@ void serial_initialize(void)
 #endif
 #if defined(CONFIG_S5P)
 	serial_register(&s5p_serial0_device);
-	serial_register(&s5p_serial1_device);
-	serial_register(&s5p_serial2_device);
-	serial_register(&s5p_serial3_device);
+//	serial_register(&s5p_serial1_device);
+//	serial_register(&s5p_serial2_device);
+//	serial_register(&s5p_serial3_device);
 #endif
 #if defined(CONFIG_MPC512X)
 #if defined(CONFIG_SYS_PSC1)

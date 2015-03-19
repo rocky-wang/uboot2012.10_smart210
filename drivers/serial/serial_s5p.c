@@ -196,6 +196,7 @@ void s5p_serial##port##_puts(const char *s) { serial_puts_dev(s, port); }
 DECLARE_S5P_SERIAL_FUNCTIONS(0);
 struct serial_device s5p_serial0_device =
 	INIT_S5P_SERIAL_STRUCTURE(0, "s5pser0");
+#if 0
 DECLARE_S5P_SERIAL_FUNCTIONS(1);
 struct serial_device s5p_serial1_device =
 	INIT_S5P_SERIAL_STRUCTURE(1, "s5pser1");
@@ -205,6 +206,7 @@ struct serial_device s5p_serial2_device =
 DECLARE_S5P_SERIAL_FUNCTIONS(3);
 struct serial_device s5p_serial3_device =
 	INIT_S5P_SERIAL_STRUCTURE(3, "s5pser3");
+#endif
 
 __weak struct serial_device *default_serial_console(void)
 {

@@ -68,7 +68,7 @@
 /*
  * select serial console configuration
  */
-#define CONFIG_SERIAL0			1	/* use SERIAL0 */
+#define CONFIG_SERIAL0			1
 #define CONFIG_SERIAL_MULTI		1
 #define CONFIG_BAUDRATE			115200
 
@@ -77,6 +77,18 @@
 
 /* Command definition */
 #include <config_cmd_default.h>
+
+/* Undef Command */
+#undef CONFIG_CMD_BOOTD
+#undef CONFIG_CMD_CONSOLE
+#undef CONFIG_CMD_ECHO
+#undef CONFIG_CMD_IMI
+#undef CONFIG_CMD_ITEST
+#undef CONFIG_CMD_LOADB
+#undef CONFIG_CMD_LOADS
+#undef CONFIG_CMD_RUN
+#undef CONFIG_CMD_SETGETDCR
+#undef CONFIG_CMD_SOURCE
 
 #undef CONFIG_CMD_FPGA
 #undef CONFIG_CMD_MISC
