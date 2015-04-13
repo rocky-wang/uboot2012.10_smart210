@@ -97,12 +97,14 @@
 #undef CONFIG_CMD_XIMG
 #define CONFIG_CMD_CACHE
 
+#define CONFIG_CMD_NET
+
 #define CONFIG_BOOTDELAY		3
 #define CONFIG_ZERO_BOOTDELAY_CHECK
 
 #define CONFIG_BOOTCOMMAND	"bootm 20008000"
 
-#define CONFIG_BOOTARGS	"root=/dev/mtdblock2 init=/linuxrc console=ttySAC0,115200"
+#define CONFIG_BOOTARGS	"root=/dev/nfs nfsroot=192.168.10.110:/home/rocky/work/rootfs ip=192.168.10.119 init=/linuxrc console=ttySAC0,115200"
 
 #define CONFIG_ENV_OVERWRITE
 #define CONFIG_SYS_CONSOLE_IS_IN_ENV
@@ -144,5 +146,24 @@
 #define CONFIG_SYS_CACHELINE_SIZE       64
 
 #include <asm/arch/gpio.h>
+
+/* dm9000 configure */
+#define CONFIG_DRIVER_DM9000  1
+#define CONFIG_DM9000_NO_SROM
+#define CONFIG_DM9000_BASE		(0x88000000)
+#define DM9000_IO			(CONFIG_DM9000_BASE)
+#define DM9000_DATA			(CONFIG_DM9000_BASE+0x0004)
+
+#define CONFIG_ETHADDR		00:40:5c:26:0a:5b
+#define CONFIG_NETMASK      255.255.255.0
+#define CONFIG_IPADDR		192.168.10.119
+#define CONFIG_SERVERIP		192.168.10.110
+#define CONFIG_GATEWAYIP	192.168.10.3
+
+#define CONFIG_CMD_PING
+
+/* MACH_TYPE_MINI210 macro will be removed once added to mach-types */
+#define MACH_TYPE_SMART210		2458	/*SMDKV210*/
+#define CONFIG_MACH_TYPE		MACH_TYPE_SMART210
 
 #endif	/* __CONFIG_H */

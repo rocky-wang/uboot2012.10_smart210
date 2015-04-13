@@ -38,7 +38,7 @@ int board_init(void)
 	/* Set Initial global variables */
 	s5pc110_gpio = (struct s5pc110_gpio *)S5PC110_GPIO_BASE;
 
-	gd->bd->bi_arch_number = MACH_TYPE_GONI;
+	gd->bd->bi_arch_number = CONFIG_MACH_TYPE;
 	gd->bd->bi_boot_params = PHYS_SDRAM_1 + 0x100;
 
 #if defined(CONFIG_PMIC)
@@ -46,6 +46,41 @@ int board_init(void)
 #endif
 	return 0;
 }
+
+#ifdef CONFIG_DRIVER_DM9000
+#define MP0_1CON 0xE02002E0
+#define SROM_BW 0xE8000000
+int smart210_dm9000_preinit()
+{
+    volatile unsigned int *MP0_1CON_base = (volatile unsigned int *)MP0_1CON;
+    volatile unsigned int *SROM_BW_base = (volatile unsigned int *)SROM_BW;
+    unsigned int var;
+
+    var = readl(MP0_1CON_base);
+    var &= ~(0xf<<4);
+    var |= (0x2<<4);
+    writel(var,MP0_1CON_base);
+
+    /* Configure rom datasize */
+    var = readl(SROM_BW_base);
+    var &= ~(0xf<<4);
+    var |= (0x3<<4);
+    writel(var,SROM_BW_base);
+
+    return 0;
+}
+
+int board_eth_init(bd_t *bis)
+{
+    int ret;
+
+    smart210_dm9000_preinit();
+
+    ret = dm9000_initialize(bis);
+
+    return ret;
+}
+#endif
 
 int dram_init(void)
 {
