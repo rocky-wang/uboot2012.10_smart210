@@ -250,6 +250,51 @@ dm9000_probe(void)
 	}
 }
 
+// modify by rocky
+enum DM9000_PHY_mode { DM9000_10MHD = 0, DM9000_100MHD =
+	    1, DM9000_10MFD = 4, DM9000_100MFD = 5, DM9000_AUTO =
+	    8, DM9000_1M_HPNA = 0x10
+};
+enum DM9000_NIC_TYPE { FASTETHER_NIC = 0, HOMERUN_NIC = 1, LONGRUN_NIC = 2
+};
+
+/* For module input parameter */
+static int media_mode = DM9000_AUTO;
+static u8 nfloor = 0;
+
+/* Set PHY operationg mode
+*/
+static void set_PHY_mode(void)
+{
+	u16 phy_reg4 = 0x01e1, phy_reg0 = 0x1000;
+	if (!(media_mode & DM9000_AUTO)) {
+		switch (media_mode) {
+		case DM9000_10MHD:
+			phy_reg4 = 0x21;
+			phy_reg0 = 0x0000;
+			break;
+		case DM9000_10MFD:
+			phy_reg4 = 0x41;
+			phy_reg0 = 0x1100;
+			break;
+		case DM9000_100MHD:
+			phy_reg4 = 0x81;
+			phy_reg0 = 0x2000;
+			break;
+		case DM9000_100MFD:
+			phy_reg4 = 0x101;
+			phy_reg0 = 0x3100;
+			break;
+		}
+		dm9000_phy_write(4, phy_reg4);	/* Set PHY media mode */
+		dm9000_phy_write(0, phy_reg0);	/*  Tmp */
+	}
+
+	DM9000_iow(DM9000_GPCR, 0x01);	/* Let GPIO0 output */
+	DM9000_iow(DM9000_GPR, 0x00);	/* Enable PHY */
+}
+/////////////////////////////////////////////////////////////////////////////////
+
 /* General Purpose dm9000 reset routine */
 static void
 dm9000_reset(void)
@@ -332,6 +377,13 @@ static int dm9000_init(struct eth_device *dev, bd_t *bd)
 		break;
 	}
 
+    //modify by rocky
+	/* GPIO0 on pre-activate PHY */
+	DM9000_iow(DM9000_GPR, 0x00);	/*REG_1F bit0 activate phyxcer */
+	/* Set PHY */
+	set_PHY_mode();
+    /////////////////////////////////////////////////////
+
 	/* Program operating register, only internal phy supported */
 	DM9000_iow(DM9000_NCR, 0x0);
 	/* TX Polling clear */
@@ -349,7 +401,9 @@ static int dm9000_init(struct eth_device *dev, bd_t *bd)
 	/* Clear interrupt status */
 	DM9000_iow(DM9000_ISR, ISR_ROOS | ISR_ROS | ISR_PTS | ISR_PRS);
 
-	printf("MAC: %pM\n", dev->enetaddr);
+	printf("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n", dev->enetaddr[0],
+	       dev->enetaddr[1], dev->enetaddr[2], dev->enetaddr[3],
+	       dev->enetaddr[4], dev->enetaddr[5]);
 
 	/* fill device MAC address registers */
 	for (i = 0, oft = DM9000_PAR; i < 6; i++, oft++)
@@ -449,6 +503,7 @@ static int dm9000_send(struct eth_device *netdev, void *packet, int length)
 */
 static void dm9000_halt(struct eth_device *netdev)
 {
+#if 0
 	DM9000_DBG("%s\n", __func__);
 
 	/* RESET devie */
@@ -456,6 +511,7 @@ static void dm9000_halt(struct eth_device *netdev)
 	DM9000_iow(DM9000_GPR, 0x01);	/* Power-Down PHY */
 	DM9000_iow(DM9000_IMR, 0x80);	/* Disable all interrupt */
 	DM9000_iow(DM9000_RCR, 0x00);	/* Disable RX */
+#endif
 }
 
 /*
@@ -561,6 +617,11 @@ static void dm9000_get_enetaddr(struct eth_device *dev)
 	int i;
 	for (i = 0; i < 3; i++)
 		dm9000_read_srom_word(i, dev->enetaddr + (2 * i));
+#else 
+    if (!eth_getenv_enetaddr("ethaddr", dev->enetaddr)) {
+        printf("Please set ethaddr!\n");
+    }
+
 #endif
 }
 
