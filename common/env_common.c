@@ -43,6 +43,7 @@ DECLARE_GLOBAL_DATA_PTR;
 const uchar default_environment[] = {
 #ifdef	CONFIG_BOOTARGS
 	"bootargs="	CONFIG_BOOTARGS			"\0"
+	"bak1=" CONFIG_BAKBOOTARGS			"\0"
 #endif
 #ifdef	CONFIG_BOOTCOMMAND
 	"bootcmd="	CONFIG_BOOTCOMMAND		"\0"

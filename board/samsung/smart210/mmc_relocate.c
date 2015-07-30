@@ -1,3 +1,9 @@
+/*
+ *@Author:	Rocky
+ *@Date:	2015-07-30
+ *@Desc:	Use System copy sd to mem
+*/
+
 typedef unsigned char (*copy_sd_to_mem)(int channel,\
                 unsigned int start_block,unsigned short block_num,\
                 unsigned int *mem_ptr,unsigned int init);

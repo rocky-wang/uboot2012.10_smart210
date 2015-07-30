@@ -104,7 +104,8 @@
 
 #define CONFIG_BOOTCOMMAND	"bootm 20008000"
 
-#define CONFIG_BOOTARGS	"root=/dev/nfs nfsroot=192.168.10.110:/home/rocky/work/rootfs ip=192.168.10.119 init=/linuxrc console=ttySAC0,115200"
+#define CONFIG_BOOTARGS	"root=/dev/ram initrd=0x20800000,8M init=/linuxrc console=ttySAC0,115200"
+#define CONFIG_BAKBOOTARGS "root=/dev/nfs nfsroot=192.168.10.110:/home/rocky/work/rootfs ip=192.168.10.119 init=/linuxrc console=ttySAC0,115200"
 
 #define CONFIG_ENV_OVERWRITE
 #define CONFIG_SYS_CONSOLE_IS_IN_ENV

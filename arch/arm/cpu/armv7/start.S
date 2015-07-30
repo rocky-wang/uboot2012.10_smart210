@@ -172,7 +172,18 @@ reset:
     ldr r0,=_start
     bl  display_hex_word
 #endif
-    
+
+/* Copy uImage to 20008000 ram for kernel */
+	ldr r0,=0x20008000
+	ldr r1,=320
+	ldr r2,=0x200000
+	bl	copy_code_to_dram
+/* Copy ramdisk to 20800000 ram for rootfs */
+	ldr r0,=0x20800000
+	ldr r1,=8512
+	ldr r2,=0x200000
+	bl	copy_code_to_dram
+
 /* Set stackpointer in internal RAM to call board_init_f */
 call_board_init_f:
 	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)
