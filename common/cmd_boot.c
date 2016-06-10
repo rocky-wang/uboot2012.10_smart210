@@ -71,14 +71,14 @@ U_BOOT_CMD(
 );
 
 /*---------------------------------------------------------------------*/
-static void setup_linux_tag(ulong param_base){
+static int setup_linux_tag(ulong param_base){
 	struct tag *params = (struct tag *)param_base;
   	char *p; 
 
 	p = getenv("bootargs");
 	if(p == NULL){
 		printf("bootargs Not Found!\n");
-		return ;
+		return -1;
 	}
    	memset(params, 0, sizeof(struct tag)); 
 
@@ -93,10 +93,8 @@ static void setup_linux_tag(ulong param_base){
 	/* setp2: setup meminfo */
 	params->hdr.tag = ATAG_MEM;
 	params->hdr.size = tag_size (tag_mem32);
-
-	params->u.mem.start = 0x20000000;
-	params->u.mem.size = 0x20000000;
-
+	params->u.mem.start = CONFIG_SYS_SDRAM_BASE;
+	params->u.mem.size = PHYS_SDRAM_1_SIZE;
 	params = tag_next (params);
 
 	/* setp3: setup cmdline */
@@ -109,6 +107,8 @@ static void setup_linux_tag(ulong param_base){
 	/* setp4: setup end */
 	params->hdr.tag = ATAG_NONE;
    	params->hdr.size = 0; 
+
+	return 0;
 }
 
 int do_goimage (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
@@ -121,10 +121,14 @@ int do_goimage (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 
 	addr = simple_strtoul(argv[1], NULL, 16);
 	
-	printf("setup linux parameters at 0x20000100\n");
-	setup_linux_tag(0x20000100);
+	printf("setup linux parameters at 0x%08lX\n",gd->bd->bi_boot_params);
+	rcode = setup_linux_tag(gd->bd->bi_boot_params);
+	if(rcode < 0){
+		printf("setup linux tag error!\n");
+		return rcode;
+	}
 
-	printf ("## Starting application at 0x%08lX ...args is 0x%081X\n", addr,gd->bd->bi_boot_params);
+	printf ("## Starting application at 0x%08lX ...\n", addr);
 
 	rc = ((ulong(*)(int,int,uint))addr) (0,gd->bd->bi_arch_number,gd->bd->bi_boot_params);
 

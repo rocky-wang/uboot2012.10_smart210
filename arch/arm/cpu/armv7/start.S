@@ -180,8 +180,8 @@ reset:
 	bl	copy_code_to_dram
 /* Copy ramdisk to 20800000 ram for rootfs */
 	ldr r0,=0x20800000
-	ldr r1,=8512
-	ldr r2,=0x200000
+	ldr r1,=8600
+	ldr r2,=0x400000
 	bl	copy_code_to_dram
 
 /* Set stackpointer in internal RAM to call board_init_f */
