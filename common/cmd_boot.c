@@ -29,6 +29,7 @@
 #include <net.h>
 
 #ifdef CONFIG_CMD_GO
+DECLARE_GLOBAL_DATA_PTR;
 
 /* Allow ports to override the default behavior */
 __attribute__((weak))
@@ -66,6 +67,74 @@ U_BOOT_CMD(
 	go, CONFIG_SYS_MAXARGS, 1,	do_go,
 	"start application at address 'addr'",
 	"addr [arg ...]\n    - start application at address 'addr'\n"
+	"      passing 'arg' as arguments"
+);
+
+/*---------------------------------------------------------------------*/
+static void setup_linux_tag(ulong param_base){
+	struct tag *params = (struct tag *)param_base;
+  	char *p; 
+
+	p = getenv("bootargs");
+	if(p == NULL){
+		printf("bootargs Not Found!\n");
+		return ;
+	}
+   	memset(params, 0, sizeof(struct tag)); 
+
+	/* step1: setup start tag */ 
+    	params->hdr.tag = ATAG_CORE;
+   	params->hdr.size = tag_size(tag_core); 
+   	params->u.core.flags = 0; 
+   	params->u.core.pagesize = 0;
+   	params->u.core.rootdev = 0; 
+    	params = tag_next(params); 
+
+	/* setp2: setup meminfo */
+	params->hdr.tag = ATAG_MEM;
+	params->hdr.size = tag_size (tag_mem32);
+
+	params->u.mem.start = 0x20000000;
+	params->u.mem.size = 0x20000000;
+
+	params = tag_next (params);
+
+	/* setp3: setup cmdline */
+	params->hdr.tag = ATAG_CMDLINE;
+	params->hdr.size =
+		(sizeof (struct tag_header) + strlen (p) + 1 + 4) >> 2;
+	strcpy (params->u.cmdline.cmdline, p);
+	params = tag_next (params);
+
+	/* setp4: setup end */
+	params->hdr.tag = ATAG_NONE;
+   	params->hdr.size = 0; 
+}
+
+int do_goimage (cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	ulong	addr, rc;
+	int     rcode = 0;
+	
+	if (argc < 2)
+		return CMD_RET_USAGE;
+
+	addr = simple_strtoul(argv[1], NULL, 16);
+	
+	printf("setup linux parameters at 0x20000100\n");
+	setup_linux_tag(0x20000100);
+
+	printf ("## Starting application at 0x%08lX ...args is 0x%081X\n", addr,gd->bd->bi_boot_params);
+
+	rc = ((ulong(*)(int,int,uint))addr) (0,gd->bd->bi_arch_number,gd->bd->bi_boot_params);
+
+	return rc;
+}
+
+U_BOOT_CMD(
+	goimage, CONFIG_SYS_MAXARGS, 1,	do_goimage,
+	"run linux kernel at address 'addr'",
+	"addr [arg ...]\n    - linux kernel at address 'addr'\n"
 	"      passing 'arg' as arguments"
 );
 
